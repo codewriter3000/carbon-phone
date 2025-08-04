@@ -6,6 +6,7 @@ mod renderer;
 mod state;
 mod workspace;
 
+use log::warn;
 use crate::config::get_config;
 use crate::element::{MyRenderElement, PointerElement};
 use crate::input::Action;
@@ -49,6 +50,7 @@ use std::rc::Rc;
 use std::{convert::TryInto, os::unix::prelude::AsRawFd, sync::Arc, time::Duration};
 
 fn main() -> anyhow::Result<(), anyhow::Error> {
+    env_logger::init();
     // Use calloop::EventLoop to process events from various sources.
     let mut event_loop: EventLoop<data::Data> = EventLoop::try_new()?;
 

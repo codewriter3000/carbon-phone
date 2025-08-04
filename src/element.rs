@@ -136,21 +136,24 @@ where
         match &self.status {
             CursorImageStatus::Hidden => vec![],
             CursorImageStatus::Default => {
-                let texture = self
+                let Some((_, texture)) = self
                     .default
                     .range((Bound::Included(self.current_delay), Bound::Unbounded))
                     .next()
-                    .unwrap();
+                else {
+                    log::warn!("No cursor texture found for delay {:?}", self.current_delay);
+                    return vec![]; // Or return a default invisible element if needed
+                };
 
-                let element =
-                    PointerRenderElement::<R>::from(TextureRenderElement::from_texture_buffer(
-                        location.to_f64(),
-                        texture.1,
-                        None,
-                        None,
-                        None,
-                    ))
-                    .into();
+                let element = PointerRenderElement::<R>::from(TextureRenderElement::from_texture_buffer(
+                    location.to_f64(),
+                    texture, // ✅ FIXED: use the texture directly, not `texture.1`
+                    None,
+                    None,
+                    None,
+                ))
+                .into();
+                            
 
                 vec![element]
             }
