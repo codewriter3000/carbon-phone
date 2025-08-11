@@ -30,30 +30,39 @@ impl<T: Texture> PointerElement<T> {
     where
         R: Renderer<TextureId = T> + ImportMem,
     {
-        // Get the xcursor theme. For example there might be a light and dark theme of cursors.
-        let theme = var("XCURSOR_THEME").ok().unwrap_or("default".into());
 
-        // Get the xcursor size. The options are 24, 32, 48, 64, with the default normally being
-        // 24px.
-        let size = var("XCURSOR_SIZE")
-            .ok()
-            .and_then(|s| s.parse::<i32>().ok())
-            .unwrap_or(24);
+        let theme = var("XCURSOR_THEME").unwrap_or_else(|_| "DMZ-White".to_string());
+        let size: i32 = var("XCURSOR_SIZE").ok().and_then(|s| s.parse().ok()).unwrap_or(24);
 
         // Load the theme and get the default cursor of that theme.
         let cursor_theme = CursorTheme::load(&theme);
-        let cursor_path = cursor_theme.load_icon("left_ptr").unwrap();
+        
+        // Try current theme, then fallback to Adwaita/DMZ-White before giving up.
+        let mut cursor_path = cursor_theme.load_icon("left_ptr");
+
+        if cursor_path.is_none() {
+            let fallback_theme = CursorTheme::load("Adwaita");
+            cursor_path = fallback_theme.load_icon("left_ptr");
+        }
+
+        if cursor_path.is_none() {
+            let fallback_theme = CursorTheme::load("DMZ-White");
+            cursor_path = fallback_theme.load_icon("left_ptr");
+        }
+
+        let cursor_path = cursor_path.expect(
+            "Cursor 'left_ptr' not found. Install DMZ-White or set XCURSOR_THEME to a valid theme."
+        );
 
         // Open the xcursor file and read the data.
-        let mut cursor_file = File::open(&cursor_path).unwrap();
+        let mut cursor_file = File::open(&cursor_path)
+            .expect("failed to open cursor file");
         let mut cursor_data = vec![];
         cursor_file.read_to_end(&mut cursor_data).unwrap();
 
         // Parse the data into xcursor::parser::Image structs.
         let cursor_images = parse_xcursor(&cursor_data)
-            .unwrap()
-            .into_iter()
-            .filter(move |image| image.width == size as u32 && image.height == size as u32);
+            .expect("failed to parse Xcursor file");
 
         // xcursor can contain an animation of a cursor (for example a cursor with a spinner).
         // Each image can contain a delay, the time period until showing the next image of the
