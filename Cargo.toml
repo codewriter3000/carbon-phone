@@ -1,11 +1,9 @@
 [package]
-name = "mini_smithay_compositor"
+name = "sparky"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-smithay = { git = "https://github.com/Smithay/smithay", branch = "master" }
-slog = "2"
-slog-async = "2"
-slog-term = "2"
-wayland-server = "0.31"
+smithay = "0.7.0"
+smithay-client-toolkit = "0.16.1"
+wayland-client = "0.31.11"
