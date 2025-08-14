@@ -1,3 +1,3 @@
-# Carbon Phone
+# Sparky
 
-I'm building the UI/UX for my own mobile phone. Obviously it's still in development. It's going to be built on a Raspberry Pi 4 running Debian OS.
+This is the name of the Wayland compositor that will be running in the background of the Carbon Phone.
